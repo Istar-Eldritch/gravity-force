@@ -1,7 +1,9 @@
 use crate::assets::{AsciiSheet, TILE_SIZE};
+use crate::physics::{Accelerations, Speed};
 use bevy::prelude::*;
+use bevy_inspector_egui::Inspectable;
 
-#[derive(Component)]
+#[derive(Component, Inspectable)]
 pub struct Player;
 
 fn spawn_player(mut commands: Commands, ascii: Res<AsciiSheet>) {
@@ -19,30 +21,44 @@ fn spawn_player(mut commands: Commands, ascii: Res<AsciiSheet>) {
             ..SpriteSheetBundle::default()
         })
         .insert(Player)
+        .insert(Accelerations(Vec3::default()))
+        .insert(Speed(Vec3::default()))
         .insert(Name::new("Player"));
 }
 
 fn player_movement(
-    mut player_query: Query<(&Player, &mut Transform)>,
+    mut player_query: Query<(&Player, &mut Accelerations)>,
     keyboard: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    let (_player, mut transform) = player_query.single_mut();
-    const base_speed: f32 = 5.0;
+    let (_player, mut accelerations) = player_query.single_mut();
+
+    const BASE_ACCEL: f32 = 5.0;
+    //**accelerations = accelerations.mul(BASE_ACCEL).mul(time.delta_seconds());
+
+    let mut accelerated = false;
     if keyboard.pressed(KeyCode::W) {
-        transform.translation.y += base_speed * time.delta_seconds() * TILE_SIZE;
+        accelerations.y += BASE_ACCEL * time.delta_seconds() * TILE_SIZE;
+        accelerated = true;
     }
 
     if keyboard.pressed(KeyCode::S) {
-        transform.translation.y -= base_speed * time.delta_seconds() * TILE_SIZE;
+        accelerations.y -= BASE_ACCEL * time.delta_seconds() * TILE_SIZE;
+        accelerated = true;
     }
 
     if keyboard.pressed(KeyCode::D) {
-        transform.translation.x += base_speed * time.delta_seconds() * TILE_SIZE;
+        accelerations.x += BASE_ACCEL * time.delta_seconds() * TILE_SIZE;
+        accelerated = true;
     }
 
     if keyboard.pressed(KeyCode::A) {
-        transform.translation.x -= base_speed * time.delta_seconds() * TILE_SIZE;
+        accelerations.x -= BASE_ACCEL * time.delta_seconds() * TILE_SIZE;
+        accelerated = true;
+    }
+
+    if !accelerated {
+        *accelerations = Accelerations(Vec3::default());
     }
 }
 

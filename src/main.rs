@@ -1,9 +1,13 @@
 use bevy::prelude::*;
 
 mod assets;
+mod debug;
+mod physics;
 mod player;
 
 use assets::AssetsPlugin;
+use debug::DebugPlugin;
+use physics::PhysicsPlugin;
 use player::PlayerPlugin;
 
 pub const CLEAR: Color = Color::rgb(0.1, 0.1, 0.1);
@@ -36,6 +40,8 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(AssetsPlugin)
         .add_plugin(PlayerPlugin)
+        .add_plugin(PhysicsPlugin)
+        .add_plugin(DebugPlugin)
         .add_startup_system(spawn_camera)
         .run();
 }
